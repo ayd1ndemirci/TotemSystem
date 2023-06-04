@@ -2,11 +2,13 @@
 
 namespace ayd1ndemirci\event;
 
+use ayd1ndemirci\event\custom\TotemUseEvent;
 use ayd1ndemirci\Main;
 use ayd1ndemirci\provider\SQLiteDatabase;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerJoinEvent;
+use pocketmine\world\sound\TotemUseSound;
 use SOFe\AwaitGenerator\Await;
 
 class PlayerListener implements Listener
@@ -35,7 +37,22 @@ class PlayerListener implements Listener
      * @param PlayerDeathEvent $event
      * @return void
      */
-    public function onPlayerDeath(PlayerDeathEvent $event) :void {
-        $event->setKeepInventory(true);
+    public function onPlayerDeath(PlayerDeathEvent $event): void
+    {
+        $player = $event->getPlayer();
+        $totem = Main::getInstance()->getManager()->getPlayerTotem($player->getName());
+        if ($totem > 0) {
+            Main::getInstance()->getManager()->takePlayerTotem($player->getName(), 1);
+            $player->sendMessage("§8» §cÖldün ama totemin olduğu için eşyaların korundu!\n§cKalan totem: §4" . $totem - 1);
+            $player->getWorld()->addSound($player->getPosition(), new TotemUseSound(), [$player]);
+            $event->setKeepInventory(true);
+            $event->setKeepXp(true);
+        }
+    }
+    public function totemUseEvent(TotemUseEvent $event) :void
+    {
+        $player = $event->getPlayer();
+        $totem = $event->getTotem();
+        Main::getInstance()->getManager()->takePlayerTotem($player->getName(), -1);
     }
 }

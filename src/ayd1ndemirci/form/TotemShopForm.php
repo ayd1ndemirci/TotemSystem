@@ -22,16 +22,16 @@ class TotemShopForm implements Form
     /*** @param Player $player */
     public function __construct(Player $player)
     {
-       $this->$player = $player;
-       $this->database = Main::getInstance()->getDatabase();
+        $this->player = $player;
+        $this->database = Main::getInstance()->getDatabase();
     }
 
     /*** @return array */
     public function jsonSerialize(): array
     {
         $totem = 0;
-        Await::f2c(function () use(&$totem) {
-            $rows = (array) yield from $this->database->getPlayerToken($this->player->getName());
+        Await::f2c(function () use (&$totem) {
+            $rows = (array)yield from $this->database->getPlayerToken($this->player->getName());
             $totem = $rows[0]["totemCount"];
         });
         $this->database->getDataConnector()->waitAll();
@@ -40,12 +40,13 @@ class TotemShopForm implements Form
             "type" => "custom_form",
             "title" => "Totem",
             "content" => [
-                ["type" => "label", "text" => "\n§7» §fTotem: §e".$totem],
+                ["type" => "label", "text" => "\n§7» §fTotem: §e" . $totem],
                 ["type" => "input", "text" => "\nMiktar", "placeholder" => "Örn.; 1"],
                 ["type" => "label", "text" => "\n§8» §c§oNot: Totem başına fiyat §4" . Main::PRICE . " §cTL'dir\n"]
             ]
         ];
     }
+
     public function handleResponse(Player $player, $data): void
     {
         if (is_null($data)) return;
@@ -60,13 +61,10 @@ class TotemShopForm implements Form
         }
         $price = $amount * Main::PRICE;
         if (EconomyAPI::getInstance()->myMoney($player) >= $price) {
-
-            Main::getInstance()->getDatabase()->updateToken($player->getName(), $amount, function () use ($player, $price, $amount) {
-                EconomyAPI::getInstance()->reduceMoney($player, $price);
-                $player->sendMessage("§8» §aBaşarıyla §2{$amount} §aadet totem satın aldın.");
-                Main::getInstance()->getDatabase()->getPlayerToken($player->getName(), fn($token) => var_dump("Token: ".$token));
-                $player->getNetworkSession()->sendDataPacket(PlaySoundPacket::create("note.pling", $player->getPosition()->getX(), $player->getPosition()->getY(), $player->getPosition()->getZ(), 2.0, 2.0));
-            });
+            EconomyAPI::getInstance()->reduceMoney($player, $price);
+            Main::getInstance()->getManager()->addPlayerTotem($player->getName(), $amount);
+            $player->sendMessage("§8» §aBaşarıyla §2{$amount} §aadet totem satın aldın.");
+            $player->getNetworkSession()->sendDataPacket(PlaySoundPacket::create("note.pling", $player->getPosition()->getX(), $player->getPosition()->getY(), $player->getPosition()->getZ(), 2.0, 2.0));
         } else $player->sendMessage("§8» §cYetersiz para.");
     }
 }
