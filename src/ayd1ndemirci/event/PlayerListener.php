@@ -47,6 +47,7 @@ class PlayerListener implements Listener
             $player->getWorld()->addSound($player->getPosition(), new TotemUseSound(), [$player]);
             $event->setKeepInventory(true);
             $event->setKeepXp(true);
+            (new TotemUseEvent($player)->call();
         }
     }
     public function totemUseEvent(TotemUseEvent $event) :void
