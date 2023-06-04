@@ -1,0 +1,6 @@
+database:
+  type: sqlite
+
+  sqlite:
+    file: database.db
+  worker-limit: 1
