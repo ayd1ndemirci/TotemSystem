@@ -3,33 +3,44 @@
 namespace ayd1ndemirci\form;
 
 use ayd1ndemirci\Main;
-use ayd1ndemirci\manager\Manager;
+use ayd1ndemirci\provider\SQLiteDatabase;
 use pocketmine\form\Form;
 use pocketmine\network\mcpe\protocol\PlaySoundPacket;
 use pocketmine\player\Player;
 use onebone\economyapi\EconomyAPI;
-use pocketmine\world\sound\TotemUseSound;
+use SOFe\AwaitGenerator\Await;
 
 class TotemShopForm implements Form
 {
 
-    /**
-     * @param Player $sender
-     */
-    public $totem;
+    /*** @var Player $sender */
+    private Player $player;
 
-    public function __construct(\pocketmine\player\Player $sender)
+    /*** @var SQLiteDatabase $database */
+    private SQLiteDatabase $database;
+
+    /*** @param Player $player */
+    public function __construct(Player $player)
     {
-       $this->sender = $sender;
+       $this->$player = $player;
+       $this->database = Main::getInstance()->getDatabase();
     }
 
-    public function jsonSerialize():mixed
+    /*** @return array */
+    public function jsonSerialize(): array
     {
+        $totem = 0;
+        Await::f2c(function () use(&$totem) {
+            $rows = (array) yield from $this->database->getPlayerToken($this->player->getName());
+            $totem = $rows[0]["totemCount"];
+        });
+        $this->database->getDataConnector()->waitAll();
+
         return [
             "type" => "custom_form",
             "title" => "Totem",
             "content" => [
-                ["type" => "label", "text" => "\n§7» §fTotem: §e" ],
+                ["type" => "label", "text" => "\n§7» §fTotem: §e".$totem],
                 ["type" => "input", "text" => "\nMiktar", "placeholder" => "Örn.; 1"],
                 ["type" => "label", "text" => "\n§8» §c§oNot: Totem başına fiyat §4" . Main::PRICE . " §cTL'dir\n"]
             ]

@@ -5,13 +5,13 @@ namespace ayd1ndemirci\provider;
 use ayd1ndemirci\Main;
 use poggit\libasynql\DataConnector;
 use poggit\libasynql\libasynql;
+use Closure;
+use SOFe\AwaitGenerator\Await;
 
 class SQLiteDatabase
 {
 
-    /**
-     * @var DataConnector
-     */
+    /*** @var DataConnector */
     private DataConnector $database;
 
     public function __construct() {
@@ -23,6 +23,11 @@ class SQLiteDatabase
         $this->database->executeGeneric("totem.createTable");
     }
 
+    /**
+     * @param string $playerName
+     * @return void
+     */
+
     public function addPlayer(string $playerName):void
     {
       $this->database->executeInsert("totem.addPlayer", [
@@ -30,7 +35,14 @@ class SQLiteDatabase
       ]);
     }
 
-    public function updateToken(string $playerName, int $addedTokenCount, \Closure $callbackFn) :void {
+    /**
+     * @param string $playerName
+     * @param int $addedTokenCount
+     * @param Closure $callbackFn
+     * @return void
+     */
+
+    public function updateToken(string $playerName, int $addedTokenCount, Closure $callbackFn) :void {
         $this->database->executeChange("totem.updateTotem", [
             "playerName" => $playerName,
             "totemCount" => $addedTokenCount
@@ -39,12 +51,15 @@ class SQLiteDatabase
         });
     }
 
-    public function getPlayerToken(string $playerName, \Closure $callbackFn) :void {
+    /**
+     * @param string $playerName
+     * @return \Generator
+     */
+    public function getPlayerToken(string $playerName) :\Generator {
         $this->database->executeSelect("totem.getTotem", [
             "playerName" => $playerName
-        ], function (array $rows) use($callbackFn) :void {
-            $callbackFn($rows[0]["totemCount"]);
-        });
+        ], yield, yield Await::REJECT);
+        return yield Await::ONCE;
     }
 
     /**
