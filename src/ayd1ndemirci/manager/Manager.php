@@ -28,11 +28,11 @@ class Manager
     public function addPlayerTotem(string $playerName, int $amount) :void
     {
         $totem = $this->getPlayerTotem($playerName);
-        Main::getInstance()->getDatabase()->updateToken($playerName, $amount, function (){});
+        $this->database->updateToken($playerName, $amount, function (){});
     }
     public function takePlayerTotem(string $playerName, int $amount) :void
     {
         $totem = $this->getPlayerTotem($playerName);
-        Main::getInstance()->getDatabase()->updateToken($playerName, -$amount, function (){});
+        $this->database->updateToken($playerName, -$amount, function (){});
     }
 }
