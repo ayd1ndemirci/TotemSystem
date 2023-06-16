@@ -12,7 +12,7 @@ class TotemShopCommand extends Command
 
     public function __construct()
     {
-        parent::__construct("totem", "Totem market");
+        parent::__construct("totem", "Totem shop");
     }
     public function execute(CommandSender $sender, string $commandLabel, array $args) :void
     {
