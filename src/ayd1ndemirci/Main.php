@@ -24,7 +24,6 @@ class Main extends PluginBase
     }
     protected function onEnable(): void
     {
-        $this->getLogger()->info("TotemShop aktif - @ayd1ndemirci");
         $this->getServer()->getCommandMap()->register("totem", new TotemShopCommand());
         $this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
     }
