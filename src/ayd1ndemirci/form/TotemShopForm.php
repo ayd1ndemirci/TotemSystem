@@ -1,4 +1,4 @@
-<?php
+    <?php
 
 namespace ayd1ndemirci\form;
 
@@ -41,8 +41,8 @@ class TotemShopForm implements Form
             "title" => "Totem",
             "content" => [
                 ["type" => "label", "text" => "\n§7» §fTotem: §e" . $totem],
-                ["type" => "input", "text" => "\nMiktar", "placeholder" => "Örn.; 1"],
-                ["type" => "label", "text" => "\n§8» §c§oNot: Totem başına fiyat §4" . Main::PRICE . " §cTL'dir\n"]
+                ["type" => "input", "text" => "\nAmount", "placeholder" => "Örn.; 1"],
+                ["type" => "label", "text" => "\n§8» §c§oNote: Price per totem §4" . Main::PRICE . " §c$\n"]
             ]
         ];
     }
@@ -52,19 +52,19 @@ class TotemShopForm implements Form
         if (is_null($data)) return;
         $amount = $data[1];
         if (empty($amount)) {
-            $player->sendMessage("§8» §cMiktar kısmı boş olamaz.");
+            $player->sendMessage("§8» §cThe quantity part cannot be empty.");
             return;
         }
         if ($amount < 1) {
-            $player->sendMessage("§8» §c1 ve 1'den büyük sayılar gir.");
+            $player->sendMessage("§8» §cEnter 1 and numbers greater than 1.");
             return;
         }
         $price = $amount * Main::PRICE;
         if (EconomyAPI::getInstance()->myMoney($player) >= $price) {
             EconomyAPI::getInstance()->reduceMoney($player, $price);
             Main::getInstance()->getManager()->addPlayerTotem($player->getName(), $amount);
-            $player->sendMessage("§8» §aBaşarıyla §2{$amount} §aadet totem satın aldın.");
             $player->getNetworkSession()->sendDataPacket(PlaySoundPacket::create("note.pling", $player->getPosition()->getX(), $player->getPosition()->getY(), $player->getPosition()->getZ(), 2.0, 2.0));
-        } else $player->sendMessage("§8» §cYetersiz para.");
+            $player->sendMessage("§8» §aYou have successfully purchased §2§o{$amount} §r§a totems.");
+        } else $player->sendMessage("§8» §cNot enough money.");
     }
 }
